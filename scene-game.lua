@@ -3,33 +3,33 @@ local widget = require( "widget" )
 local scene = composer.newScene()
 
 -- -----------------------------------------------------------------------------------
--- Code outside of the scene event functions below will only be executed ONCE unless
--- the scene is removed entirely (not recycled) via "composer.removeScene()"
+-- O código fora das funções do evento de cena abaixo só será executado uma vez a menos que
+-- a cena é removida inteiramente (não reciclado) via "composer.removeScene ()"
 local physics = require( "physics" )
 physics.start()
---physics.setDrawMode( "hybrid" ) -- enable this to see the physics boundaries
+--physics.setDrawMode ("híbrido") - habilite isso para ver os limites da física
 physics.setGravity( 0, 19.6 )
 
-local createCircle -- this is a function to hold all of the circles created
-local circleTable = {} -- this is a table that holds all circle objects
-local circleCounter = 1 -- keep track of the number of circles on the stage
-local tmr_createCircles -- a variable to keep track of the timer
+local createCircle -- Esta é uma função para manter todos os círculos criados
+local circleTable = {} -- Esta é uma tabela que contém todos os objetos do círculo
+local circleCounter = 1 -- acompanhar o número de círculos no palco
+local tmr_createCircles -- uma variável para acompanhar o cronômetro
 
 local touchArea, background
 
 local onGlobalCollision, gameOver
 local btn_menu, onMenuTouch
 local txt_gameOver, txt_playerScore
-local scoreCounter = 0 -- track the number of successful bounces
-local bounceBar -- the variable to hold the bounce bar object
-local isGameOver = false -- lets us know whether or not the game is over
+local scoreCounter = 0 -- acompanhar o número de saltos bem sucedidos
+local bounceBar -- a variável para manter o objeto da barra de rejeição
+local isGameOver = false -- permite saber se o jogo acabou ou não
 -- -----------------------------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------------------------
--- Scene event functions
+-- Funções de evento de cena
 
--- gameOver will be called when the game is over. Stop physics, remove objects, and display game over
+-- gameOver será chamado quando o jogo acabar. Pare a física, remova objetos e mostre o jogo
 gameOver = function()
   isGameOver = true
   physics.pause()
@@ -51,16 +51,15 @@ addToScore = function()
   transition.to(txt_playerScore, {xScale=tempScale, yScale=tempScale} )
 end
 
--- Create the "circle". The circle can be any circular object. In this game, we are using a character in a circle
 createCircle = function()
 
   transition.to(background, {xScale=1.15, yScale=1.15, time=300})
   transition.to(background, {xScale=1, yScale=1, delay=300})
 
-  local circle = display.newImageRect("images/circle.png", 125, 125)
+  local circle = display.newImageRect("images/Ball.png", 125, 125)
     circle.x = 450; circle.y = 100
     circle.alpha = 0
-    circle.myName = "circle"
+    circle.myName = "Ball"
     physics.addBody( circle, { density=1.0, friction=0, bounce = 0.9, radius=60 } )
 
     local leftOrRight
@@ -76,13 +75,13 @@ createCircle = function()
   return circle
 end
 
--- This gets called when two physics objects collide with each other.
+-- Isso é chamado quando dois objetos de física colidem uns com os outros.
 onGlobalCollision = function(event)
     local obj1 = event.object1
     local obj2 = event.object2
 
     if ( event.phase == "ended" ) then
-      if( obj1.myName == "bar" and obj2.myName == "circle" and isGameOver == false) then
+      if( obj1.myName == "bar" and obj2.myName == "Ball" and isGameOver == false) then
 
         timer.performWithDelay(1, function()
           if(isGameOver == false) then
@@ -96,33 +95,31 @@ onGlobalCollision = function(event)
         addToScore()
       end
 
-      if(obj1.myName == "touchArea" and obj2.myName == "circle") then
+      if(obj1.myName == "touchArea" and obj2.myName == "Ball") then
         gameOver()
       end
-      if(obj1.myName == "circle" and obj2.myName == "touchArea") then
+      if(obj1.myName == "Ball" and obj2.myName == "touchArea") then
         gameOver()
       end
     end
 end
 
--- Finally, send the player back to the menu
+-- Finalmente, envie o jogador de volta ao menu
 onMenuTouch = function(event)
   if ( "ended" == event.phase ) then
     composer.gotoScene("scene-menu", "fade")
   end
 end
--- -----------------------------------------------------------------------------------
 
--- create()
 function scene:create( event )
 
     local sceneGroup = self.view
 
-    -- Display a background
+    -- Exibir um plano de fundo
     background = display.newImageRect(sceneGroup, "images/background1.png", _S.actualWidth, _S.actualHeight)
       background.x = _S.centerX; background.y = _S.centerY
 
-    -- Create touch area that will respond to player drag and will call game over if a ball collides with the touch area
+    -- Crie a área de toque que irá responder ao arrasto do jogador e irá ligar para o jogo se uma bola entrar em colisão com a área de toque
     touchArea = display.newRect(sceneGroup, 0, 0, _S.actualWidth, 200)
       touchArea.x = _S.centerX
       touchArea.y = _S.bottom - (touchArea.height * 0.5)
@@ -132,7 +129,7 @@ function scene:create( event )
       touchArea.gravityScale = 0
       touchArea.isSensor = true
 
-    -- Text objects for instruction: txt_touchInstructions, txt_playerScore, txt_gameOver
+    -- Objetos de texto para instruções: txt_touchInstructions, txt_playerScore, txt_gameOver
     local txt_touchInstructions = display.newText(sceneGroup, "Arraste aqui para mover", 0, 0, "ChunkFive", 32)
       txt_touchInstructions.x = _S.centerX
       txt_touchInstructions.y = touchArea.y
@@ -146,7 +143,7 @@ function scene:create( event )
       txt_gameOver.y = txt_playerScore.y - (txt_playerScore.height * 2)
       txt_gameOver.alpha = 0
 
-    -- Create the boundaries: leftWall, rightWall, topWall
+    -- Crie os limites: leftWall, rightWall, topWall
     local leftWall = display.newRect(sceneGroup, 0, 0, 20, _S.actualHeight)
       leftWall.anchorX = 0; leftWall.x = _S.left - leftWall.width
       leftWall.anchorY = 0; leftWall.y = _S.top
@@ -168,13 +165,13 @@ function scene:create( event )
       topWall.myName = "wall"
       physics.addBody( topWall, "static", {friction=0, bounce = 1} )
 
-    -- The bounce bar is the object where the ball bounces off
-    bounceBar = display.newImageRect(sceneGroup, "images/bar.png", 225, 42)
+    --A barra de rejeição é o objeto onde a bola salta
+    bounceBar = display.newImageRect(sceneGroup, "images/barra.png", 225, 42)
       bounceBar.x = _S.centerX
       bounceBar.y = touchArea.y - (touchArea.height * 0.5)
       physics.addBody( bounceBar, "static", {friction=0, bounce = 1} )
       bounceBar.gravityScale = 0
-      bounceBar.myName = "bar"
+      bounceBar.myName = "barra"
 
     -- A button to send the player back to the menu, only available on game over
     btn_menu = widget.newButton( {
@@ -194,26 +191,25 @@ function scene:create( event )
     btn_menu.alpha = 0
     sceneGroup:insert(btn_menu)
 
-    -- touch listener function
     function touchArea:touch( event )
       if event.phase == "began" then
-        display.getCurrentStage():setFocus( self, event.id ) -- first we set the focus on the object
+        display.getCurrentStage():setFocus( self, event.id ) -- primeiro focamos o objeto
         self.isFocus = true
-        bounceBar.markX = bounceBar.x -- then we store the original x and y position
+        bounceBar.markX = bounceBar.x -- então nós armazenamos a posição x e y original
 
       elseif self.isFocus then
 
         if event.phase == "moved" then
           if(event.x > 0 and event.x < _S.right) then
-            bounceBar.x = event.x - event.xStart + bounceBar.markX -- then drag our object
+            bounceBar.x = event.x - event.xStart + bounceBar.markX -- então arraste o objeto
           end
         elseif event.phase == "ended" or event.phase == "cancelled" then
-          -- we end the movement by removing the focus from the object
+          -- acabamos com o movimento removendo o foco do objeto
           display.getCurrentStage():setFocus( self, nil )
           self.isFocus = false
         end
       end
-      return true -- return true so Corona knows that the touch event was handled properly
+      return true -- volte  para que Corona saiba que o evento de toque foi tratado corretamente
     end
 
 
@@ -221,17 +217,17 @@ function scene:create( event )
 end
 
 
--- show()
+-- exposição()
 function scene:show( event )
 
     local sceneGroup = self.view
     local phase = event.phase
 
     if ( phase == "will" ) then
-        -- Code here runs when the scene is still off screen (but is about to come on screen)
+        -- O código aqui é executado quando a cena ainda está fora da tela (mas está prestes a aparecer na tela)
 
     elseif ( phase == "did" ) then
-        -- Code here runs when the scene is entirely on screen
+        -- O código aqui é executado quando a cena está inteiramente na tela
       circleTable[circleCounter] = createCircle()
       sceneGroup:insert(circleTable[circleCounter])
 
@@ -243,40 +239,40 @@ function scene:show( event )
 
       Runtime:addEventListener( "collision", onGlobalCollision )
 
-      -- finally, add an event listener to our touchArea to allow it to be dragged
+      -- finalmente, adicione um ouvinte de eventos ao nosso touchArea para permitir que ele seja arrastado
       touchArea:addEventListener( "touch", touchArea )
 
     end
 end
 
 
--- hide()
+-- ocultar()
 function scene:hide( event )
 
     local sceneGroup = self.view
     local phase = event.phase
 
     if ( phase == "will" ) then
-        -- Code here runs when the scene is on screen (but is about to go off screen)
+        -- O código aqui é executado quando a cena está na tela (mas está prestes a sair da tela)
 
     elseif ( phase == "did" ) then
-        -- Code here runs immediately after the scene goes entirely off screen
+        -- O código aqui é executado imediatamente após a cena sair inteiramente da tela
 
     end
 end
 
 
--- destroy()
+-- destruir()
 function scene:destroy( event )
 
     local sceneGroup = self.view
-    -- Code here runs prior to the removal of scene's view
+    -- O código aqui é executado antes da remoção da visão da cena
 
 end
 
 
 -- -----------------------------------------------------------------------------------
--- Scene event function listeners
+-- Função de evento de cena ouvintes
 -- -----------------------------------------------------------------------------------
 scene:addEventListener( "create", scene )
 scene:addEventListener( "show", scene )
