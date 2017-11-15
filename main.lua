@@ -1,10 +1,4 @@
------------------------------------------------------------------------------------------
---
--- main.lua
---
------------------------------------------------------------------------------------------
 
--- Your code here
 display.setStatusBar( display.HiddenStatusBar )
 
 math.randomseed( os.time() )
@@ -17,8 +11,8 @@ _S = {
   bottom = display.viewableContentHeight - display.screenOriginY,
   left = display.screenOriginX,
   right = display.viewableContentWidth - display.screenOriginX,
-  actualWidth = display.actualContentWidth, -- Added actual content width global
-  actualHeight = display.actualContentHeight -- Added actual content height global
+  actualWidth = display.actualContentWidth, 
+  actualHeight = display.actualContentHeight 
 }
 
 local composer = require( "composer" )
